@@ -1,5 +1,6 @@
 require('dotenv').config()
 const connectDB = require('./database/connection')
+connectDB()
 const express = require('express')
 const morgan = require('morgan')
 const ejs = require('ejs')
@@ -22,16 +23,24 @@ function assignId(req, res, next) {
 //
 app.use(express.json())
 
+// to properly get POST method req.body
+// https://stackoverflow.com/questions/48726473/postman-raw-data-works-but-form-data-not-works-on-post-request-in-node
+app.use(express.urlencoded({
+    extended: true
+}))
+
 // setting view engine 
 app.set('view engine', 'ejs')
+
+
+// 
+app.use('/user/register', require('./routes/register'))
 
 //
 app.route('/')
 
 .get((req, res) => {
-    res.status(200).json({
-        message: 'success'
-    })
+    res.status(200).render('index')
 })
 
 //
