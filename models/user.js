@@ -27,10 +27,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: { values: ['male', 'female', 'other'], message: '{VALUE} is not allowed 💀' }
     },
-    skill: { //https://mongoosejs.com/docs/populate.html#saving-refs
+    skills: [{ //https://mongoosejs.com/docs/populate.html#saving-refs
         type: Schema.Types.ObjectId,
         ref: 'Skill'
-    }
+    }]
 })
 
 const User = mongoose.model('User', userSchema)

@@ -13,4 +13,9 @@ router
     .delete(userController.deleteUser)
     .patch(userController.patchUser);
 
+
+router
+    .route('/change-password/:_id')
+    .post(userController.changePassword);
+
 module.exports = router;
