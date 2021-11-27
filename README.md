@@ -10,3 +10,4 @@ npm start
 
 ## learnings 
 - bcrypt npm package to hash passwords 
+- mongoose schema , enum, [populate](https://mongoosejs.com/docs/populate.html#populate)

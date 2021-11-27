@@ -34,8 +34,9 @@ app.set('view engine', 'ejs')
 
 
 // 
-app.use('/user/register', require('./routes/register'))
-app.use('/user/login', require('./routes/login'))
+app.use('/register', require('./routes/register'))
+app.use('/login', require('./routes/login'))
+app.use('/user', require('./routes/userRoutes'))
 
 //
 app.route('/')
