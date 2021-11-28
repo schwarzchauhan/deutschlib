@@ -4,6 +4,7 @@ connectDB()
 const express = require('express')
 const morgan = require('morgan')
 const ejs = require('ejs')
+const path = require('path')
 
 const app = express()
 
@@ -20,7 +21,7 @@ function assignId(req, res, next) {
     next();
 }
 
-//
+app.use(express.static(path.join(__dirname, 'public'))) // https://expressjs.com/en/starter/static-files.html
 app.use(express.json())
 
 // to properly get POST method req.body
@@ -37,6 +38,7 @@ app.set('view engine', 'ejs')
 app.use('/register', require('./routes/register'))
 app.use('/login', require('./routes/login'))
 app.use('/user', require('./routes/userRoutes'))
+app.use('/post', require('./routes/postRoutes'))
 
 //
 app.route('/')

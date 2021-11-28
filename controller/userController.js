@@ -66,6 +66,7 @@ exports.changePassword = async(req, res) => {
             u.password = hash
             await u.save()
             console.log(u);
+            return res.send('Password changed successfully')
         } else {
             return res.send('Password does not match 💀')
         }
