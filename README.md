@@ -17,3 +17,6 @@ npm start
 ## learnings 
 - bcrypt npm package to hash passwords 
 - mongoose schema , enum, [populate](https://mongoosejs.com/docs/populate.html#populate), array field
+  - [convert mongoose createdAt timing to local timing](https://www.codegrepper.com/code-examples/javascript/createdAt+to+normal+date+)
+- js 
+  - [arrow function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions#comparing_traditional_functions_to_arrow_functions)
