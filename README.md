@@ -20,3 +20,7 @@ npm start
   - [convert mongoose createdAt timing to local timing](https://www.codegrepper.com/code-examples/javascript/createdAt+to+normal+date+)
 - js 
   - [arrow function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions#comparing_traditional_functions_to_arrow_functions)
+- fs module
+  - [read file async-ly](https://nodejs.org/api/fs.html#fspromisesreadfilepath-options)
+- [handlebars email sending templating](https://github.com/handlebars-lang/handlebars.js#usage)
+- [handlebars email sending templating](https://stackoverflow.com/questions/39489229/pass-variable-to-html-template-in-nodemailer)
