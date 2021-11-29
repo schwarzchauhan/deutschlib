@@ -7,6 +7,9 @@ npm run dev
 npm start
 ```
 
+### featuer
+- password reset link will expire in 120seconds
+
 
 ### About appliation
 - a user can register in to app
@@ -16,7 +19,7 @@ npm start
 
 ## learnings 
 - bcrypt npm package to hash passwords 
-- mongoose schema , enum, [populate](https://mongoosejs.com/docs/populate.html#populate), array field
+- mongoose schema , enum, [populate](https://mongoosejs.com/docs/populate.html#populate), array field, [Error](https://mongoosejs.com/docs/api/error.html#error_Error)
   - [convert mongoose createdAt timing to local timing](https://www.codegrepper.com/code-examples/javascript/createdAt+to+normal+date+)
 - js 
   - [arrow function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions#comparing_traditional_functions_to_arrow_functions)

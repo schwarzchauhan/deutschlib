@@ -137,7 +137,7 @@ exports.forgotPassword = async(req, res) => {
             // making token to store user _id
             const privateKey = process.env.JWT_KEY + u.password
             console.log(privateKey);
-            const token = jwt.sign({ email: u.email }, privateKey, { expiresIn: 120 * 120 }) // A numeric value is interpreted as a seconds count. 
+            const token = jwt.sign({ email: u.email }, privateKey, { expiresIn: 120 }) // A numeric value is interpreted as a seconds count. 
             console.log(token);
             console.log(`${process.env.APP_BASE_URL}/user/reset-password/${token}/${u._id}`);
 
@@ -183,7 +183,7 @@ exports.resetPassword = async(req, res) => {
         const { token, _id } = req.params;
         console.log(req.params);
 
-        const u = await User.findById(_id);
+        const u = await User.findOne({ _id });
         if (u) {
             console.log(u);
             const privateKey = process.env.JWT_KEY + u.password;
@@ -193,17 +193,55 @@ exports.resetPassword = async(req, res) => {
             }
             return res.json(decoded); // here we get user email 
             /*
-                now in frontend make a form with user email as hidden , which we explicitly set from here
-                reset of the field like new passwored , confirm new  password can be entered by the user
+                now in frontend make a form with the newpassword, confirmnewpassword filed  
+                and action POST /user/reset-password/:token/:_id
             */
         } else {
             return res.status(404).send('invalid url 💀')
         }
     } catch (err) {
+        if (err instanceof mongoose.Error) {
+            return res.status(404).send('invalid url 💀')
+        }
         return res.json(err);
     }
 }
 
-// exports.setNewPassword = aync(req, res) => {
-// make logic to set the new password entred by the user
-// }
+exports.setNewPassword = async(req, res) => {
+    // make logic to set the new password entred by the user
+    try {
+        const { newPassword } = req.body;
+
+        const { token, _id } = req.params;
+        console.log(req.params);
+
+        const u = await User.findById(_id);
+        if (u) {
+            console.log(u);
+            const privateKey = process.env.JWT_KEY + u.password;
+            const decoded = jwt.verify(token, privateKey);
+            console.log(decoded);
+            if (!decoded) {
+                return res.send('password rest link expired 💀')
+            } else {
+                const hash = await bcrypt.hash(newPassword, saltRounds);
+                console.log(hash);
+                u.password = hash;
+                await u.save();
+                console.log(u);
+                return res.send('password reset successfully')
+            }
+        } else {
+            return res.status(404).send('invalid url 💀')
+        }
+    } catch (err) {
+        console.log(err);
+        if (err.name == 'JsonWebTokenError' && err.message == 'invalid signature') { // https://github.com/auth0/node-jsonwebtoken#jsonwebtokenerror
+            return res.status(404).send('invalid url 💀')
+        }
+        if (err instanceof mongoose.Error) { // https://mongoosejs.com/docs/api/error.html#error_Error
+            return res.status(404).send('invalid url 💀')
+        }
+        return res.json(err)
+    }
+}

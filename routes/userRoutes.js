@@ -23,7 +23,7 @@ router
 
 router
     .route('/reset-password/:token/:_id')
-    .get(userController.resetPassword); // to get password reset link  when user clicks on mail link received
-// .post(userController.setNewPassword)
+    .get(userController.resetPassword) // to get password reset link  when user clicks on mail link received
+    .post(userController.setNewPassword)
 
 module.exports = router;
