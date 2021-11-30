@@ -23,19 +23,23 @@ router.route('/')
 
         // console.log('bcrypt callback start');
         if (match == true) {
-            // https://github.com/auth0/node-jsonwebtoken
+            // https://github.com/auth0/node-jsonwebtoken signing token
             const privateKey = process.env.JWT_KEY
-            console.log(privateKey);
-            const token = jwt.sign({ _id: u._id }, privateKey, { expiresIn: 50 }) // A numeric value is interpreted as a seconds count. 
+            console.log(`privateKey: `, privateKey);
+            const expSecs = 60;
+            const token = jwt.sign({ _id: u._id }, privateKey, { expiresIn: expSecs }) // A numeric value is interpreted as a seconds count. 
+            console.log(`token: `, token);
+            // https://expressjs.com/en/api.html#res.cookie storing token in cookie
+            res.cookie('access_token', `Bearer ${token}`, {
+                maxAge: expSecs * 1000 // expires in 1hour
+            });
+            // const crt = new Date()
+            // const exp = new Date(Date.now() + expSecs * 1000)
+            // console.log(`created on  ${crt.toLocaleString()}, will expire on ${exp.toLocaleString()}`);
 
-            const crt = new Date()
-            const exp = new Date(Date.now() + 50 * 1000)
-            console.log(`created on  ${crt.toLocaleString()}, will expire on ${exp.toLocaleString()}`);
-
-            console.log(token)
-            return res.json({ message: 'Login successfully' })
+            return res.json({ message: 'Login successfully ⭐' })
         } else {
-            return res.json({ message: 'Wrong Credentials' })
+            return res.json({ message: 'Wrong Credentials 💀' })
         }
     } catch (error) {
         return console.log(error);
