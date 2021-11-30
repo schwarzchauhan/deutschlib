@@ -5,6 +5,7 @@ const express = require('express')
 const morgan = require('morgan')
 const ejs = require('ejs')
 const path = require('path')
+const cookieParser = require('cookie-parser')
 
 const app = express()
 
@@ -23,7 +24,7 @@ function assignId(req, res, next) {
 
 app.use(express.static(path.join(__dirname, 'public'))) // https://expressjs.com/en/starter/static-files.html
 app.use(express.json())
-
+app.use(cookieParser()); // http://expressjs.com/en/resources/middleware/cookie-parser.html
 // to properly get POST method req.body
 // https://stackoverflow.com/questions/48726473/postman-raw-data-works-but-form-data-not-works-on-post-request-in-node
 app.use(express.urlencoded({
@@ -39,6 +40,7 @@ app.use('/register', require('./routes/register'))
 app.use('/login', require('./routes/login'))
 app.use('/user', require('./routes/userRoutes'))
 app.use('/post', require('./routes/postRoutes'))
+app.use('/dashboard', require('./routes/dashboardRoutes'))
 
 //
 app.route('/')

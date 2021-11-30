@@ -14,7 +14,7 @@ const myCreateUser = async function(name, email, password, role) {
     try {
         // console.log(bcrypt.hash(password, saltRounds));
         const hash = await bcrypt.hash(password, saltRounds);
-        console.log(hash);
+        // console.log(hash);
         const u = new User({
             name,
             email,
@@ -28,10 +28,10 @@ const myCreateUser = async function(name, email, password, role) {
     }
 }
 
-
+// to register new user
 exports.createUser = async(req, res) => {
     try {
-        console.log(req.body);
+        // console.log(req.body);
         const { name, email, password, role } = req.body;
         if (!(name && email && password && role)) {
             return res.status(200).send('Credentials Missing !')
@@ -40,18 +40,15 @@ exports.createUser = async(req, res) => {
         if (u) {
             return res.send('user with this email already registered 💀')
         }
-        console.log('before call');
         const newUser = await myCreateUser(name, email, password, role)
         console.log(newUser);
-        console.log('after call');
-        return res.send(newUser)
+        return res.send('new user successfully registered into database ⭐')
     } catch (err) {
-        console.log(`some error`);
-        return res.json(err);
+        console.log(err);
+        return res.send('some error while registering new user 💀')
+            // return res.json(err);
     }
 }
-
-
 
 exports.deleteUser = async(req, res) => {
     try {
@@ -134,11 +131,11 @@ exports.forgotPassword = async(req, res) => {
         if (u) {
             console.log(u);
 
-            // making token to store user _id
+            // making token to store user email
             const privateKey = process.env.JWT_KEY + u.password
-            console.log(privateKey);
+            console.log(`privateKey`, privateKey);
             const token = jwt.sign({ email: u.email }, privateKey, { expiresIn: 120 }) // A numeric value is interpreted as a seconds count. 
-            console.log(token);
+            console.log(`token`, token);
             console.log(`${process.env.APP_BASE_URL}/user/reset-password/${token}/${u._id}`);
 
             const passwordResetUrl = `${process.env.APP_BASE_URL}/user/reset-password/${token}/${u._id}`;
@@ -168,7 +165,7 @@ exports.forgotPassword = async(req, res) => {
                 html: htmlToSend
             });
 
-            return res.send('ok')
+            return res.send('password reset link sent to your email')
         } else {
             return res.send('user not registered 💀')
         }
@@ -177,7 +174,7 @@ exports.forgotPassword = async(req, res) => {
     }
 }
 
-// to navigate user to new password reset page whent user clicks reset-link sent on mail
+// to navigate user to new password reset page when user clicks reset-link sent on mail
 exports.resetPassword = async(req, res) => {
     try {
         const { token, _id } = req.params;
@@ -207,6 +204,8 @@ exports.resetPassword = async(req, res) => {
     }
 }
 
+
+// to save the password entered by user into the database
 exports.setNewPassword = async(req, res) => {
     // make logic to set the new password entred by the user
     try {

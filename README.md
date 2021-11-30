@@ -7,15 +7,25 @@ npm run dev
 npm start
 ```
 
-### featuer
+### feature
 - password reset link will expire in 120seconds
 
 
-### About appliation
+### About application
 - a user can register in to app
 - then she can login 
-- user can also add their skill in profile section
-- a user can have multiple skills ([populate](https://mongoosejs.com/docs/populate.html#populate) concept used here)
+- user can also __add their skill__ in profile section
+- a user can have multiple skills ([mongoose populate](https://mongoosejs.com/docs/populate.html#populate) concept used here)
+- if user __forgets password__
+  - she enters her email
+  - a password reset link is sent to her email
+  - then user can clicks on link(expiry time 120 seconds)
+  - then user can set new password on the page appeared by cliking above link
+  - password is reset successfully
+- cookie feature
+  - user logins in to app
+  - an token get stored in the cookies(expires automatically after one minute)
+  - now user proceed to `/dashboard` route easily
 
 ## learnings 
 - bcrypt npm package to hash passwords 
