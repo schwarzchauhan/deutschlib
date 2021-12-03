@@ -30,7 +30,8 @@ const userSchema = new mongoose.Schema({
     skills: [{ //https://mongoosejs.com/docs/populate.html#saving-refs
         type: Schema.Types.ObjectId,
         ref: 'Skill'
-    }]
+    }],
+    passwordChangedAt: Date
 })
 
 const User = mongoose.model('User', userSchema)

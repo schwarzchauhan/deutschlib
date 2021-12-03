@@ -7,6 +7,7 @@ const saltRounds = 10;
 const mymail = require('./../services/mymail')
 const handlebars = require('handlebars')
 const jwt = require('jsonwebtoken')
+const myCreateExpire = require('./../modules/myCreateExpire')
 
 // https://github.com/kelektiv/node.bcrypt.js#async-recommended
 // https://github.com/kelektiv/node.bcrypt.js#api
@@ -38,6 +39,7 @@ exports.createUser = async(req, res) => {
         }
         const u = await User.findOne({ email: email })
         if (u) {
+            console.log('user with this email already registered 💀');
             return res.send('user with this email already registered 💀')
         }
         const newUser = await myCreateUser(name, email, password, role)
@@ -128,47 +130,46 @@ exports.forgotPassword = async(req, res) => {
         // console.log(req.params._id);
         const u = await User.findOne({ email: req.body.email })
 
-        if (u) {
-            console.log(u);
-
-            // making token to store user email
-            const privateKey = process.env.JWT_KEY + u.password
-            console.log(`privateKey`, privateKey);
-            const token = jwt.sign({ email: u.email }, privateKey, { expiresIn: 120 }) // A numeric value is interpreted as a seconds count. 
-            console.log(`token`, token);
-            console.log(`${process.env.APP_BASE_URL}/user/reset-password/${token}/${u._id}`);
-
-            const passwordResetUrl = `${process.env.APP_BASE_URL}/user/reset-password/${token}/${u._id}`;
-            const resetLinkValidityDuration = '120seconds';
-
-            const crt = new Date()
-            const exp = new Date(Date.now() + 120 * 1000)
-            console.log(`created on  ${crt.toLocaleString()}, will expire on ${exp.toLocaleString()}`);
-
-            // reading html file using handlebar template
-            const emailFilePath = `${__dirname}/../public/html/reset-password-hbs.html`;
-            // console.log(emailFilePath);
-            const htmlFile = await fs.promises.readFile(emailFilePath, { encoding: 'utf8' }); // https://nodejs.org/api/fs.html#fspromisesreadfilepath-options
-            // console.log(htmlFile);
-            // return res.send(htmlFile)
-
-            // https://github.com/handlebars-lang/handlebars.js#usage
-            const htmlTemplate = handlebars.compile(htmlFile);
-            const replacements = { name: u.name, passwordResetUrl, resetLinkValidityDuration };
-            const htmlToSend = htmlTemplate(replacements)
-            console.log(htmlToSend);
-
-            mymail.sendEmail({
-                subject: 'Reset password for the app',
-                email: u.email,
-                // text: 'hello boi'
-                html: htmlToSend
-            });
-
-            return res.send('password reset link sent to your email')
-        } else {
+        if (!u) {
             return res.send('user not registered 💀')
         }
+        console.log(u);
+
+        // making token to store user email
+        const privateKey = process.env.JWT_KEY + u.password
+        console.log(`privateKey`, privateKey);
+        const expSecs = 120;
+        const token = jwt.sign({ email: u.email }, privateKey, { expiresIn: expSecs }) // A numeric value is interpreted as a seconds count. 
+        console.log(`token`, token);
+        console.log(`${process.env.APP_BASE_URL}/user/reset-password/${token}/${u._id}`);
+
+        const passwordResetUrl = `${process.env.APP_BASE_URL}/user/reset-password/${token}/${u._id}`;
+        const resetLinkValidityDuration = `${expSecs} seconds`;
+
+        myCreateExpire(Date.now(), expSecs * 1000)
+
+        // reading html file using handlebar template
+        const emailFilePath = `${__dirname}/../public/html/reset-password-hbs.html`;
+        // console.log(emailFilePath);
+        const htmlFile = await fs.promises.readFile(emailFilePath, { encoding: 'utf8' }); // https://nodejs.org/api/fs.html#fspromisesreadfilepath-options
+        // console.log(htmlFile);
+        // return res.send(htmlFile)
+
+        // https://github.com/handlebars-lang/handlebars.js#usage
+        const htmlTemplate = handlebars.compile(htmlFile);
+        const replacements = { name: u.name, passwordResetUrl, resetLinkValidityDuration };
+        const htmlToSend = htmlTemplate(replacements);
+        // console.log(htmlToSend);
+
+        mymail.sendEmail({
+            subject: 'Reset password for the app',
+            email: u.email,
+            // text: 'hello boi'
+            html: htmlToSend
+        });
+
+        return res.send('password reset link sent to your email')
+
     } catch (err) {
         return console.log(err);
     }
@@ -181,24 +182,31 @@ exports.resetPassword = async(req, res) => {
         console.log(req.params);
 
         const u = await User.findOne({ _id });
-        if (u) {
-            console.log(u);
-            const privateKey = process.env.JWT_KEY + u.password;
-            const decoded = jwt.verify(token, privateKey);
-            if (!decoded) {
-                return res.send('password rest link expired 💀')
-            }
-            return res.json(decoded); // here we get user email 
-            /*
-                now in frontend make a form with the newpassword, confirmnewpassword filed  
-                and action POST /user/reset-password/:token/:_id
-            */
-        } else {
+        if (!u) {
             return res.status(404).send('invalid url 💀')
         }
+        console.log(u);
+        const privateKey = process.env.JWT_KEY + u.password;
+
+        const decoded = jwt.verify(token, privateKey);
+        if (!decoded) {
+            return res.send('password rest link expired 💀')
+        }
+
+        // make a logic to chk if the userchanged the password after pwd-reset-token was issued 
+
+        console.log(decoded);
+        return res.send('now in frontend make a form with the newpassword, confirmnew password filed'); // here we get user email 
+        /*
+            and action POST /user/reset-password/:token/:_id
+        */
     } catch (err) {
+        console.log(err);
         if (err instanceof mongoose.Error) {
             return res.status(404).send('invalid url 💀')
+        }
+        if (err.name === 'TokenExpiredError') {
+            return res.send('Password Reset Link Expired 💀');
         }
         return res.json(err);
     }
@@ -215,23 +223,22 @@ exports.setNewPassword = async(req, res) => {
         console.log(req.params);
 
         const u = await User.findById(_id);
-        if (u) {
-            console.log(u);
-            const privateKey = process.env.JWT_KEY + u.password;
-            const decoded = jwt.verify(token, privateKey);
-            console.log(decoded);
-            if (!decoded) {
-                return res.send('password rest link expired 💀')
-            } else {
-                const hash = await bcrypt.hash(newPassword, saltRounds);
-                console.log(hash);
-                u.password = hash;
-                await u.save();
-                console.log(u);
-                return res.send('password reset successfully')
-            }
-        } else {
+        if (!u) {
             return res.status(404).send('invalid url 💀')
+        }
+        console.log(u);
+        const privateKey = process.env.JWT_KEY + u.password;
+        const decoded = jwt.verify(token, privateKey);
+        console.log(decoded);
+        if (!decoded) {
+            return res.send('password rest link expired 💀')
+        } else {
+            const hash = await bcrypt.hash(newPassword, saltRounds);
+            console.log(hash);
+            u.password = hash;
+            await u.save();
+            console.log(u);
+            return res.send('password reset successfully')
         }
     } catch (err) {
         console.log(err);

@@ -19,12 +19,12 @@ npm start
 - if user __forgets password__
   - she enters her email
   - a password reset link is sent to her email
-  - then user can clicks on link(expiry time 120 seconds)
+  - then user can clicks on link(expiry time `120 seconds`)
   - then user can set new password on the page appeared by cliking above link
   - password is reset successfully
 - cookie feature
   - user logins in to app
-  - an token get stored in the cookies(expires automatically after one minute)
+  - an token get stored in the cookies(expires automatically after `one minute`)
   - now user proceed to `/dashboard` route easily
 
 ## learnings 

@@ -43,3 +43,16 @@ exports.postOnSite = (req, res) => {
         return res.json(req.file);
     })
 }
+
+exports.viewPost = async(req, res) => {
+    try {
+        // https://expressjs.com/en/api.html#req.query
+        console.log(`req.query`, req.query);
+        const posts = await Post.find({}); // https://mongoosejs.com/docs/queries.html#executing read this 
+        // return res.json(posts)
+        return res.send('show all posts here')
+    } catch (err) {
+        console.log(err);
+        return res.send(err.message)
+    }
+}
