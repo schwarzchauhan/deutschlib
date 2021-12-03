@@ -110,14 +110,17 @@ exports.changePassword = async(req, res) => {
         const match = await bcrypt.compare(old_pwd, u.password)
         console.log(match);
         if (match) {
-            const hash = await bcrypt.hash(new_pwd, saltRounds)
-            console.log(hash);
-            u.password = hash
+            const hash = await bcrypt.hash(new_pwd, saltRounds);
+            // console.log(hash);
+            u.password = hash;
+            // console.log(Date.now());
+            u.passwordChangedAt = new Date(Date.now()); // https://mongoosejs.com/docs/tutorials/dates.html
             await u.save()
             console.log(u);
-            return res.send('Password changed successfully')
+            res.clearCookie('access_token')
+            return res.send('Password changed successfully ⭐')
         } else {
-            return res.send('Password does not match 💀')
+            return res.send('Old Password does not match 💀')
         }
     } catch (err) {
         return console.log(err);
@@ -136,7 +139,7 @@ exports.forgotPassword = async(req, res) => {
         console.log(u);
 
         // making token to store user email
-        const privateKey = process.env.JWT_KEY + u.password
+        const privateKey = process.env.JWT_KEY + u.password; // it also include old password hence ensuring that link expires once user enters new pwd
         console.log(`privateKey`, privateKey);
         const expSecs = 120;
         const token = jwt.sign({ email: u.email }, privateKey, { expiresIn: expSecs }) // A numeric value is interpreted as a seconds count. 
@@ -193,8 +196,6 @@ exports.resetPassword = async(req, res) => {
             return res.send('password rest link expired 💀')
         }
 
-        // make a logic to chk if the userchanged the password after pwd-reset-token was issued 
-
         console.log(decoded);
         return res.send('now in frontend make a form with the newpassword, confirmnew password filed'); // here we get user email 
         /*
@@ -227,23 +228,33 @@ exports.setNewPassword = async(req, res) => {
             return res.status(404).send('invalid url 💀')
         }
         console.log(u);
-        const privateKey = process.env.JWT_KEY + u.password;
+        const privateKey = process.env.JWT_KEY + u.password; // it also include old password hence ensuring that link expires once user enters new pwd
         const decoded = jwt.verify(token, privateKey);
         console.log(decoded);
         if (!decoded) {
             return res.send('password rest link expired 💀')
-        } else {
-            const hash = await bcrypt.hash(newPassword, saltRounds);
-            console.log(hash);
-            u.password = hash;
-            await u.save();
-            console.log(u);
-            return res.send('password reset successfully')
         }
+
+        //  no need chk lastPasswordchanged as the private key(consisting of old password) is used to decode the password reseet token 
+        // console.log(`${(new Date(decoded.iat*1000)).toString()}`);
+        // console.log(`${(new Date(u.passwordChangedAt)).toString()}`);
+        // return res.send('just chk')
+
+
+        const hash = await bcrypt.hash(newPassword, saltRounds);
+        // console.log(hash);
+        u.password = hash;
+        console.log(`Password reset at ${(new Date(Date.now())).toString()}`);
+        u.passwordChangedAt = new Date(Date.now());
+        res.clearCookie('access_token');
+        await u.save();
+        console.log(u);
+        return res.send('password reset successfully')
+
     } catch (err) {
         console.log(err);
         if (err.name == 'JsonWebTokenError' && err.message == 'invalid signature') { // https://github.com/auth0/node-jsonwebtoken#jsonwebtokenerror
-            return res.status(404).send('invalid url 💀')
+            return res.status(404).send('One Time Password reset link expired 💀')
         }
         if (err instanceof mongoose.Error) { // https://mongoosejs.com/docs/api/error.html#error_Error
             return res.status(404).send('invalid url 💀')

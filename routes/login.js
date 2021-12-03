@@ -2,7 +2,7 @@ const router = require('express').Router();
 const bcrypt = require('bcrypt')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
-
+const myCreateExpire = require('./../modules/myCreateExpire')
 
 
 router.route('/')
@@ -33,10 +33,8 @@ router.route('/')
             res.cookie('access_token', `Bearer ${token}`, {
                 maxAge: expSecs * 1000 // expires in 1hour
             });
-            // const crt = new Date()
-            // const exp = new Date(Date.now() + expSecs * 1000)
-            // console.log(`created on  ${crt.toLocaleString()}, will expire on ${exp.toLocaleString()}`);
-
+            console.log(`Both cookie & jsonwebtoken`);
+            myCreateExpire(Date.now(), expSecs * 1000)
             return res.json({ message: 'Login successfully ⭐' })
         } else {
             return res.json({ message: 'Wrong Credentials 💀' })

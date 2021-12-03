@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../controller/userController');
+const authController = require('./../controller/authController')
 
 router
     .route('/')
@@ -15,7 +16,7 @@ router
 
 router
     .route('/change-password/:_id')
-    .post(userController.changePassword);
+    .post(authController.verifyGenuineUser, userController.changePassword);
 
 router
     .route('/forgot-password')
