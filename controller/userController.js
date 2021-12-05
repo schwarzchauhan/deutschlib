@@ -8,6 +8,7 @@ const mymail = require('./../services/mymail')
 const handlebars = require('handlebars')
 const jwt = require('jsonwebtoken')
 const myCreateExpire = require('./../modules/myCreateExpire')
+const myUserAccessToken = require('./../modules/myUserAccessToken')
 
 // https://github.com/kelektiv/node.bcrypt.js#async-recommended
 // https://github.com/kelektiv/node.bcrypt.js#api
@@ -44,6 +45,18 @@ exports.createUser = async(req, res) => {
         }
         const newUser = await myCreateUser(name, email, password, role)
         console.log(newUser);
+
+        // code to save user access_token in cookies
+        const expSecs = 60;
+        const token = await myUserAccessToken(expSecs, newUser);
+        // https://expressjs.com/en/api.html#res.cookie storing token in cookie
+        res.cookie('access_token', `Bearer ${token}`, {
+            maxAge: expSecs * 1000 // expires in 1hour
+        });
+        console.log(`Both cookie & jsonwebtoken`);
+        myCreateExpire(Date.now(), expSecs * 1000);
+        console.log(token);
+
         return res.send('new user successfully registered into database ⭐')
     } catch (err) {
         console.log(err);

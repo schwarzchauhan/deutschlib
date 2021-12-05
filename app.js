@@ -34,7 +34,6 @@ app.use(express.urlencoded({
 // setting view engine 
 app.set('view engine', 'ejs')
 
-
 // 
 app.use('/register', require('./routes/register'))
 app.use('/login', require('./routes/login'))

@@ -17,14 +17,14 @@ exports.postOnSite = (req, res) => {
             cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`)
         }
     })
-    const upload = multer({ storage: storage }).single('postImg')
+    const upload = multer({ storage: storage }).single('postImg'); // in form fieldname of image must be postImg
 
     upload(req, res, async(err) => {
         if (err) { return console.log(err); }
         console.log(`in upload`, req.body);
         const timeNow = new Date(Date.now());
-        const user = req.params._id; // later replace this by username
-        console.log(`posted by ${user} on ${timeNow.toString()}`);
+        const user_id = req.params._id; // later replace this by username
+        console.log(`posted by ${user_id} on ${timeNow.toString()}`);
 
         const postImgUrl = `${req.file.destination}/${req.file.filename}`;
         const postText = `${req.body.postText}`;
@@ -32,7 +32,8 @@ exports.postOnSite = (req, res) => {
 
         const newPost = new Post({
             postImgUrl,
-            postText
+            postText,
+            postBy: user_id
         })
         await newPost.save();
         console.log(newPost);
@@ -48,7 +49,8 @@ exports.viewPost = async(req, res) => {
     try {
         // https://expressjs.com/en/api.html#req.query
         console.log(`req.query`, req.query);
-        const posts = await Post.find({}); // https://mongoosejs.com/docs/queries.html#executing read this 
+        const posts = await Post.find({}).populate('postBy'); // https://mongoosejs.com/docs/queries.html#executing read this 
+        console.log(posts);
         // return res.json(posts)
         return res.send('show all posts here')
     } catch (err) {

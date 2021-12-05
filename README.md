@@ -26,8 +26,8 @@ npm start
   - then user can set new password on the page appeared by cliking above link
   - password is reset successfully
 - cookie feature
-  - user logins in to app
-  - an token get stored in the cookies(expires automatically after `one minute`)
+  - user logins or registers in to app
+  - an access_token get stored in the cookies(which expires automatically after `one minute`)
   - now user proceed to `/dashboard` route easily
 
 ## learnings 
